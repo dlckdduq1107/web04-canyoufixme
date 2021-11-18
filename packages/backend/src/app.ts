@@ -21,7 +21,13 @@ import { router as submitController } from './controller/submitController';
 const app: express.Application = express();
 
 const server = createServer(app);
-
+const sessionConfig = session({
+  secret: 'GyungGi_FourSkyking',
+  store: sessionStore,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 1000 * 3600 * 12 },
+});
 app.use(cookieParser());
 
 app.use(express.json());
@@ -39,15 +45,7 @@ app.use(
   },
 );
 
-app.use(
-  session({
-    secret: 'GyungGi_FourSkyking',
-    store: sessionStore,
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 1000 * 3600 * 12 },
-  }),
-);
+app.use(sessionConfig);
 
 app.use('/api/problems', problemsController);
 app.use('/api/problem', problemController);
@@ -58,7 +56,7 @@ app.use('/api/submit', submitController);
 
 createConnection(mysqlConnectionOptions).then(() => {
   const port = process.env.PORT || 3001;
-  socketConnection(server);
+  socketConnection(server, sessionConfig);
   server.listen(port, () => {
     /* eslint-disable-next-line no-console */
     console.log(`Running Server port ${port}`);

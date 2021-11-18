@@ -124,7 +124,7 @@ const DebugPage: React.FC = () => {
   };
 
   const onSubmit = useCallback(async () => {
-    socket = io(`${process.env.REACT_APP_API_URL}`);
+    socket = io(`${process.env.REACT_APP_API_URL}`, { withCredentials: true });
     socket.on('connect', () => {
       console.log(socket.id);
     });

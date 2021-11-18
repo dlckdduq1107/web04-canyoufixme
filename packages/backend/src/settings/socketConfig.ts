@@ -27,14 +27,21 @@ const getTestCode = async problemId => {
   return problemCodeData.testCode;
 };
 
-export const socketConnection = httpServer => {
+export const socketConnection = (httpServer, sessionConfig) => {
   const pool = workerpool.pool();
 
   const io = new Server(httpServer, {
-    cors: { origin: process.env.ORIGIN_URL },
+    cors: { origin: process.env.ORIGIN_URL, credentials: true },
+  });
+  io.use((socket, next) => {
+    sessionConfig(socket.request, {}, next);
   });
 
   io.on('connection', socket => {
+    console.log(
+      'handshake',
+      (socket.request as unknown as { session: unknown })?.session,
+    );
     socket.on('submit', async ({ code, id }) => {
       const testCode = await getTestCode(id);
       gradingWithWorkerpool({ pool, socket, code, testCode: [...testCode] });
